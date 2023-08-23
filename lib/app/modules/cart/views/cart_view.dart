@@ -1,7 +1,10 @@
 import 'package:ecom_2/app/constants.dart';
+import 'package:ecom_2/app/modules/order/views/order_view.dart';
+import 'package:ecom_2/app/utils/memoryManagement.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:khalti_flutter/khalti_flutter.dart';
 
 import '../controllers/cart_controller.dart';
 
@@ -13,6 +16,15 @@ class CartView extends GetView<CartController> {
         appBar: AppBar(
           title: const Text('CartView'),
           centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const OrderView(),
+                  ));
+                },
+                icon: const Icon(Icons.shopping_bag))
+          ],
         ),
         body: GetBuilder<CartController>(
           builder: (controller) => Padding(
@@ -53,20 +65,109 @@ class CartView extends GetView<CartController> {
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           )),
-                      ElevatedButton(
-                          onPressed: () {
-                            controller.makeOrder();
-                          },
-                          child: const Text(
-                            'Make order',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ))
+                      TextButton(
+                        onPressed: () {
+                          var orderID = controller.makeOrder();
+                          if (orderID == null) {
+                            return;
+                          }
+                          KhaltiScope.of(Get.context!).pay(
+                              preferences: [
+                                PaymentPreference.khalti,
+                                PaymentPreference.connectIPS,
+                              ],
+                              config: PaymentConfig(
+                                amount: 1000,
+                                productIdentity:
+                                    MemoryManagement.getOrderID().toString(),
+                                productName: 'productName',
+                              ),
+                              onSuccess: (v) {
+                                Get.showSnackbar(const GetSnackBar(
+                                  backgroundColor: Colors.green,
+                                  message: 'Product ordering successful',
+                                  duration: Duration(seconds: 3),
+                                ));
+                                controller.makePayment(orderID);
+                              },
+                              onFailure: (v) {
+                                Get.showSnackbar(const GetSnackBar(
+                                  backgroundColor: Colors.red,
+                                  message: 'Payment failed!!!',
+                                  duration: Duration(seconds: 3),
+                                ));
+                              },
+                              onCancel: () {
+                                Get.showSnackbar(const GetSnackBar(
+                                  backgroundColor: Colors.red,
+                                  message: 'Payment cancelled!!!',
+                                  duration: Duration(seconds: 3),
+                                ));
+                              });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          margin: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 7,
+                                ),
+                              ]),
+                          child: Row(
+                            // mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Image.network(
+                                  'https://web.khalti.com/static/img/logo1.png',
+                                  height: 30,
+                                  width: 50,
+                                ),
+                              ),
+                              Expanded(child: const Text('Pay with khalti'))
+                            ],
+                          ),
+                        ),
+                      )
+
+                      // ElevatedButton(
+                      //     onPressed: () {
+                      //       controller.makeOrder();
+                      //     },
+                      //     child: const Text(
+                      //       'Make order',
+                      //       style: TextStyle(
+                      //         fontWeight: FontWeight.bold,
+                      //         fontSize: 16,
+                      //       ),
+                      //     ))
                     ],
                   ),
-                )
+                ),
+                // Container(
+                //   width: double.infinity,
+                //   padding: const EdgeInsets.all(10),
+                //   child: Column(
+                //     children: [
+                //       // ElevatedButton(
+                //       //     onPressed: () {
+                //       //       controller.makePayment();
+                //       //     },
+                //       //     child: const Text(
+                //       //       'Make payment',
+                //       //       style: TextStyle(
+                //       //         fontWeight: FontWeight.bold,
+                //       //         fontSize: 16,
+                //       //       ),
+                //       //     ))
+                //     ],
+                //   ),
+                // )
               ],
             ),
           ),

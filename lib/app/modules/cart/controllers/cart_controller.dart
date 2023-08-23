@@ -73,32 +73,70 @@ class CartController extends GetxController {
     });
   }
 
-  Future<void> makeOrder() async {
-    var url = Uri.http(ipAddress, 'ecom_API/createOrder');
-    var cartOrder = jsonEncode(cart
-        .map((e) => {'product': e.product.toJson(), 'quantity': e.quantity})
-        .toList());
+  Future<int?> makeOrder() async {
+    try {
+      var url = Uri.http(ipAddress, 'ecom_API/createOrder');
+      var cartOrder = jsonEncode(cart
+          .map((e) => {'product': e.product.toJson(), 'quantity': e.quantity})
+          .toList());
+      var response = await http.post(url, body: {
+        'token': MemoryManagement.getAccessToken(),
+        'cart': cartOrder,
+        'total': total.toString()
+      });
+
+      var result = jsonDecode(response.body);
+
+      if (result['success']) {
+        MemoryManagement.setOrderID(result['data']);
+        Get.showSnackbar(const GetSnackBar(
+          backgroundColor: Colors.green,
+          message: 'Product ordering successful',
+          duration: Duration(seconds: 3),
+        ));
+        return result['data'];
+      } else {
+        Get.showSnackbar(GetSnackBar(
+          backgroundColor: Colors.red,
+          message: result['message'],
+          duration: const Duration(seconds: 3),
+        ));
+      }
+    } catch (e) {
+      Get.showSnackbar(const GetSnackBar(
+        backgroundColor: Colors.red,
+        message: 'Something went wrong',
+        duration: Duration(seconds: 3),
+      ));
+    }
+
+    return null;
+  }
+
+  Future<int?> makePayment(orderID) async {
+    var url = Uri.http(ipAddress, 'ecom_API/makePayment');
+
     var response = await http.post(url, body: {
       'token': MemoryManagement.getAccessToken(),
-      'cart': cartOrder,
-      'total': total.toString()
+      'orderID': orderID.toString()
     });
 
     var result = jsonDecode(response.body);
 
     if (result['success']) {
-      MemoryManagement.setOrderID(result['data']);
-      Get.showSnackbar(const GetSnackBar(
+      Get.showSnackbar(GetSnackBar(
         backgroundColor: Colors.green,
-        message: 'Product ordering successful',
-        duration: Duration(seconds: 3),
+        message: result['message'],
+        duration: const Duration(seconds: 3),
       ));
+      return result['data'];
     } else {
       Get.showSnackbar(GetSnackBar(
         backgroundColor: Colors.red,
         message: result['message'],
         duration: const Duration(seconds: 3),
       ));
+      return null;
     }
   }
 }

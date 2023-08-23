@@ -40,6 +40,7 @@ class HomeController extends GetxController {
     // prefs = await SharedPreferences.getInstance();
     getCategory();
     getProduct();
+    print("token is ${MemoryManagement.getAccessToken()}");
   }
 
   void onPickImage() async {

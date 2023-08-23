@@ -21,6 +21,7 @@ abstract class Routes {
   static const ADMIN_DASHBOARD = _Paths.ADMIN_DASHBOARD;
   static const ADMIN_ORDERS = _Paths.ADMIN_ORDERS;
   static const ADMIN_PRODUCTS = _Paths.ADMIN_PRODUCTS;
+  static const ORDER = _Paths.ORDER;
 }
 
 abstract class _Paths {
@@ -41,4 +42,5 @@ abstract class _Paths {
   static const ADMIN_DASHBOARD = '/admin-dashboard';
   static const ADMIN_ORDERS = '/admin-orders';
   static const ADMIN_PRODUCTS = '/admin-products';
+  static const ORDER = '/order';
 }
