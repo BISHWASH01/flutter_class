@@ -20,7 +20,7 @@ if (!isset($_POST['orderID'])) {
     echo json_encode(
         array(
             "success" => false,
-            "message" => "incorrect order id",
+            "message" => "no order id",
         )
     );
     die();
@@ -94,8 +94,6 @@ if ($num != 0) {
 }
 
 }
-
-
 
 
 function getTotal($orderID){
