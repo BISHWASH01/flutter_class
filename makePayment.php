@@ -16,11 +16,11 @@ if (!isset($_POST['token'])) {
 }
 // ||!isset($_POST['total'])
 
-if (!isset($_POST['orderID'])) {
+if (!isset($_POST['orderID']) || !isset($_POST['total'])|| !isset($_POST['otherData'])) {
     echo json_encode(
         array(
             "success" => false,
-            "message" => "no order id",
+            "message" => "no order id/total/otherData",
         )
     );
     die();
@@ -29,7 +29,10 @@ global $CON;
 
 $token = $_POST['token'];
 $orderID = $_POST['orderID'];
-$total = getTotal($orderID);
+$total = $_POST['total'];
+$otherData = $_POST['otherData'];
+
+// $total = getTotal($orderID);
 $userID = getUserID($token);
 
 checkPaymentStatus($orderID);
@@ -37,7 +40,7 @@ checkPaymentStatus($orderID);
 
 
 
-$sql = "INSERT INTO paymet (userID, orderID,amount) VALUES ('$userID','$orderID','$total')";
+$sql = "INSERT INTO paymet (userID, orderID,amount,otherData) VALUES ('$userID','$orderID','$total','$otherData')";
 $result = mysqli_query($CON,$sql);
 if ($result) {
     $paymentID = mysqli_insert_id($CON);
@@ -52,11 +55,27 @@ if ($result) {
     //     return $row['total'];
     // }
 
-   echo json_encode(
+    if ($result){
+        echo json_encode(
+            array(
+                "success" => true,
+                "message" => "payment made successfully"
+            )
+        );
+    }else{
+        echo json_encode(
+            array(
+                "success" => false,
+                "message" => "payment update failed"
+            )
+        );
+
+    }
+}else{
+    echo json_encode(
         array(
-            "success" => true,
-            "message" => "payment made",
-            "data" => $orderID
+            "success" => false,
+            "message" => "Payment creation failed"
         )
     );
 }
@@ -75,8 +94,7 @@ if ($num != 0) {
         echo json_encode(
             array(
                 "success" => false,
-                "message" => "payment already made",
-                "data" => $orderID
+                "message" => "payment already made"
             )
         );
         die();
@@ -85,8 +103,7 @@ if ($num != 0) {
     echo json_encode(
         array(
             "success" => false,
-            "message" => "no order of that ID found",
-            "data" => $orderID
+            "message" => "no order of that ID found"
         )
     );
     die();
@@ -96,18 +113,18 @@ if ($num != 0) {
 }
 
 
-function getTotal($orderID){
-    global $CON;
-    $sql = "SELECT * from ordersmade where orderID = '$orderID'";
-    $result = mysqli_query($CON, $sql);
-    $num = mysqli_num_rows($result);
+// function getTotal($orderID){
+//     global $CON;
+//     $sql = "SELECT * from ordersmade where orderID = '$orderID'";
+//     $result = mysqli_query($CON, $sql);
+//     $num = mysqli_num_rows($result);
 
-    if ($num == 0) {
-        return null;
-    }else{
-        $row = mysqli_fetch_assoc($result);
-        return $row['total'];
-    }
+//     if ($num == 0) {
+//         return null;
+//     }else{
+//         $row = mysqli_fetch_assoc($result);
+//         return $row['total'];
+//     }
 
 
-}
+// }
