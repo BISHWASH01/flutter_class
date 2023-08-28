@@ -76,12 +76,13 @@ class CartController extends GetxController {
   Future<int?> makeOrder() async {
     try {
       var url = Uri.http(ipAddress, 'ecom_API/createOrder');
-      var cartOrder = jsonEncode(cart
-          .map((e) => {'product': e.product.toJson(), 'quantity': e.quantity})
-          .toList());
+      // var cartOrder = jsonEncode(cart
+      //     .map((e) => {'product': e.product.toJson(), 'quantity': e.quantity})
+      //     .toList());
       var response = await http.post(url, body: {
         'token': MemoryManagement.getAccessToken(),
-        'cart': cartOrder,
+        // 'cart': cartOrder,
+        'cart': MemoryManagement.getMyCart(),
         'total': total.toString()
       });
 
@@ -113,12 +114,17 @@ class CartController extends GetxController {
     return null;
   }
 
-  Future<int?> makePayment(orderID) async {
+  Future<int?> makePayment(
+      {required String total,
+      required String orderID,
+      required String otherData}) async {
     var url = Uri.http(ipAddress, 'ecom_API/makePayment');
 
     var response = await http.post(url, body: {
       'token': MemoryManagement.getAccessToken(),
-      'orderID': orderID.toString()
+      'orderID': orderID.toString(),
+      'total': total.toString(),
+      'otherData': otherData.toString()
     });
 
     var result = jsonDecode(response.body);

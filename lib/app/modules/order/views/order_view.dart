@@ -76,8 +76,8 @@ class OrderView extends GetView<OrderController> {
                     children: [
                       ElevatedButton(
                           onPressed: () {
-                            controller
-                                .makePayment(MemoryManagement.getOrderID());
+                            // controller
+                            // .makePayment(MemoryManagement.getOrderID());
                           },
                           child: const Text(
                             'Make payment',

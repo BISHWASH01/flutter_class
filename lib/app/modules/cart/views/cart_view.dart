@@ -66,8 +66,16 @@ class CartView extends GetView<CartController> {
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           )),
                       TextButton(
-                        onPressed: () {
-                          var orderID = controller.makeOrder();
+                        onPressed: () async {
+                          if (controller.cart.isEmpty) {
+                            Get.showSnackbar(const GetSnackBar(
+                              backgroundColor: Colors.red,
+                              message: 'Cart is empty!',
+                              duration: Duration(seconds: 3),
+                            ));
+                            return;
+                          }
+                          var orderID = await controller.makeOrder();
                           if (orderID == null) {
                             return;
                           }
@@ -82,13 +90,11 @@ class CartView extends GetView<CartController> {
                                     MemoryManagement.getOrderID().toString(),
                                 productName: 'productName',
                               ),
-                              onSuccess: (v) {
-                                Get.showSnackbar(const GetSnackBar(
-                                  backgroundColor: Colors.green,
-                                  message: 'Product ordering successful',
-                                  duration: Duration(seconds: 3),
-                                ));
-                                controller.makePayment(orderID);
+                              onSuccess: (PaymentSuccessModel v) {
+                                controller.makePayment(
+                                    orderID: orderID.toString(),
+                                    total: (v.amount / 100).toString(),
+                                    otherData: v.toString());
                               },
                               onFailure: (v) {
                                 Get.showSnackbar(const GetSnackBar(
@@ -107,7 +113,7 @@ class CartView extends GetView<CartController> {
                         },
                         child: Container(
                           padding: const EdgeInsets.all(10),
-                          margin: EdgeInsets.all(10),
+                          margin: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
@@ -122,14 +128,11 @@ class CartView extends GetView<CartController> {
                             // mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: Image.network(
-                                  'https://web.khalti.com/static/img/logo1.png',
-                                  height: 30,
-                                  width: 50,
-                                ),
+                              Image.network(
+                                'https://web.khalti.com/static/img/logo1.png',
+                                height: 30,
                               ),
-                              Expanded(child: const Text('Pay with khalti'))
+                              const Text('Pay with khalti')
                             ],
                           ),
                         ),
